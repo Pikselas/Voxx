@@ -55,7 +55,7 @@ public:
 
 		while(!new_path_components.empty())
 		{
-			path_components.push_back(new_path_components.top());
+			path_components.push_front(new_path_components.top());
 			new_path_components.pop();
 		}
 
