@@ -170,7 +170,7 @@
     <ResourceCompile Include="Voxx.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="C:\Users\Aritra Maji\Downloads\SynthPymLogo.ico" />
+    <Image Include="media\SynthPymLogo.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
