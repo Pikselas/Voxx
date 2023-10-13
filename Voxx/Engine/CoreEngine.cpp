@@ -152,6 +152,9 @@ ImageSprite CoreEngine::CreateSprite(const Image& image)
 
 	ImageSprite sprite;
 
+	sprite.width = image.GetWidth();
+	sprite.height = image.GetHeight();
+
 	// create vertex buffer
 	D3D11_BUFFER_DESC bd = { 0 };
 	bd.ByteWidth = sizeof(VertexType) * 4;

@@ -11,6 +11,9 @@ private:
 private:
 	Microsoft::WRL::ComPtr<ID3D11Texture2D>			 TEXTURE;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> TEXTURE_VIEW;
+private:
+	unsigned int width;
+	unsigned int height;
 public:
 	void Draw(Engine& engine) const override
 	{
@@ -25,5 +28,15 @@ public:
 		engine.SetComponent(vertex_buffer.Get());
 
 		engine.Draw();
+	}
+
+public:
+	unsigned int GetWidth() const
+	{
+		return width;
+	}
+	unsigned int GetHeight() const
+	{
+		return height;
 	}
 };

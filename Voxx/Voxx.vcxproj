@@ -149,8 +149,8 @@
     <ClInclude Include="Engine\Sprite.h" />
     <ClInclude Include="Engine\StandardWindow.h" />
     <ClInclude Include="Engine\Window.h" />
-    <ClInclude Include="Goblin.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Scene.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Engine\PixelShader.hlsl">
