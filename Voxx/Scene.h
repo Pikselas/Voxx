@@ -25,6 +25,9 @@ private:
 	ImageSprite path_comp;
 	ImageSprite enemy_ship;
 private:
+	DirectX::XMVECTOR space_ship_direction = DirectX::XMVectorZero();
+	float space_ship_angle = 0.0f;
+private:
 	std::deque<path_component> path_components;
 private:
 	std::queue<Bullet> bullets;
@@ -143,16 +146,22 @@ public:
 		auto angle = std::atan2(DirectX::XMVectorGetY(dist), DirectX::XMVectorGetX(dist));
 		space_ship.SetTransformation(DirectX::XMMatrixRotationZ(angle + 1.6));
 		enemy_ship.SetTransformation(DirectX::XMMatrixRotationZ(angle + 1.6));
+
+		space_ship_direction = DirectX::XMVector2Normalize(dist);
+		space_ship_angle = angle;
 	}
 	void FireBullet()
 	{
 		auto bullet1 = bullet;
 		auto bullet2 = bullet;
 
-		bullet1.SetPosition(DirectX::XMVectorSet(DirectX::XMVectorGetX(space_ship.GetPosition()) - 20, 580, 0, 0));
-		bullet2.SetPosition(DirectX::XMVectorSet(DirectX::XMVectorGetX(space_ship.GetPosition()) + 20, 580, 0, 0));
+		bullet1.SetPosition(DirectX::XMVectorSet(DirectX::XMVectorGetX(space_ship.GetPosition()) - 30, 550, 0, 0));
+		bullet2.SetPosition(DirectX::XMVectorSet(DirectX::XMVectorGetX(space_ship.GetPosition()) + 30, 550, 0, 0));
 
-		auto velocity = DirectX::XMVectorSet(0, -5, 0, 0);
+		bullet1.SetTransformation(DirectX::XMMatrixRotationZ(space_ship_angle));
+		bullet2.SetTransformation(DirectX::XMMatrixRotationZ(space_ship_angle));
+
+		auto velocity = DirectX::XMVectorScale(space_ship_direction, 5.0f);
 
 		bullets.push({ velocity, bullet1 });
 		bullets.push({ velocity, bullet2 });
