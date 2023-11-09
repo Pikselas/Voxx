@@ -2,6 +2,9 @@
 #include<stack>
 #include<queue>
 #include "Engine/CoreEngine.h"
+
+#include"HealthBar.h"
+
 class Scene
 {
 private:
@@ -25,6 +28,8 @@ private:
 	ImageSprite space_ship;
 	ImageSprite path_comp;
 	ImageSprite enemy_ship;
+	HealthBar enemy_health_bar;
+	HealthBar space_ship_health_bar;
 private:
 	int enemy_health = 1000;
 	int space_ship_health = 1000;
@@ -37,7 +42,7 @@ private:
 	std::queue<Bullet> bullets;
 	std::queue<Bullet> enemy_bullets;
 public:
-	Scene(CoreEngine& engine) : engine(engine){}
+	Scene(CoreEngine& engine) : engine(engine) , enemy_health_bar(engine , 1000) , space_ship_health_bar(engine,1000){}
 private:
 	bool IsColliding(DirectX::XMVECTOR pos1 , unsigned int half_w1 , unsigned int half_h1, DirectX::XMVECTOR pos2 , unsigned int half_w2 , unsigned int half_h2)
 	{
@@ -150,7 +155,11 @@ public:
 		}
 
 		enemy_ship.Draw(engine);
+		enemy_health_bar.SetHealth(enemy_health);
+		enemy_health_bar.Draw();
 		space_ship.Draw(engine);
+		space_ship_health_bar.SetHealth(space_ship_health);
+		space_ship_health_bar.Draw();
 
 		if(enemy_health <= 0)
 		{
@@ -204,7 +213,9 @@ public:
 	}
 	void SetEnemyShipPosition(int x)
 	{
-		enemy_ship.SetPosition(DirectX::XMVectorSetX(enemy_ship.GetPosition() , x));
+		auto pos = DirectX::XMVectorSetX(enemy_ship.GetPosition(), x);
+		enemy_ship.SetPosition(pos);
+		enemy_health_bar.SetPosition(pos);
 
 		auto dist = DirectX::XMVectorSubtract(enemy_ship.GetPosition(), space_ship.GetPosition());
 		auto angle = std::atan2(DirectX::XMVectorGetY(dist), DirectX::XMVectorGetX(dist));
@@ -237,6 +248,8 @@ public:
 
 		space_ship_direction = DirectX::XMVector2Normalize(dist);
 		space_ship_angle = angle;
+
+		space_ship_health_bar.SetPosition(pos);
 	}
 	void FireBullet()
 	{
