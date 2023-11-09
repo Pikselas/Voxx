@@ -16,21 +16,16 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	CoreEngine engine( window );
 
 	auto path = engine.CreateSprite(Image("media/road-1.jpg"));
-	auto spaceship = engine.CreateSprite(Image("media/space_ship.png"));
 	auto background = engine.CreateSprite(Image("media/background-1.jpg"));
-	auto enemy_ship = engine.CreateSprite(Image("media/Enemy_ship_.png"));
 	auto bullet = engine.CreateSprite(Image("media/bullet.png"));
 	auto enemy_bullet = engine.CreateSprite(Image("media/bullet-2.png"));
-	enemy_ship.SetPosition(DirectX::XMVectorSet(500, 250, 0, 1));
 	
 	Scene scene(engine);
 
 	scene.SetPath(path);
-	scene.SetSpaceShip(spaceship);
 	scene.SetBullet(bullet);
 	scene.SetEnemyBullet(enemy_bullet);
 	scene.SetSky(background);
-	scene.SetEnemyShip(enemy_ship);
 
 	auto lib = LoadLibrary("client.dll");
 	if(lib == NULL)
@@ -69,17 +64,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			}
 			break;
 			case EventHolder::Type::Fire:
-			{
-				(scene).FireEnemyBullet();
-			}
+				scene.FireEnemyBullet();
 			break;
 			case EventHolder::Type::Ready:
-			{
 				((GameData*)game_data)->RemoteReady = true;
-			}
 			break;
 		}
-		//((Scene*)scene)->SetEnemyShipPosition(*ev);
 	}, &game_data);
 
 	window.mouse.OnMove = [&](auto&)
@@ -100,7 +90,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	scene.OnLose = [&]()
 	{
 		RemoteReady = false;
-		MessageBox(window.window_handle, "You lose", "Game over", MB_ICONINFORMATION);
+		MessageBox(window.window_handle, "You lose", "Game over", MB_ICONERROR);
 		auto ev = CreateGameEvent(ReadyEvent{});
 		SendEvent(&ev, sizeof(ev));
 		scene.Reset();
@@ -113,7 +103,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		SendEvent(&ev, sizeof(ev));
 		scene.Reset();
 	};
-	
+
 	while(window.IsOpen())
 	{
 		if (RemoteReady)

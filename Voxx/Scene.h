@@ -3,7 +3,7 @@
 #include<queue>
 #include "Engine/CoreEngine.h"
 
-#include"HealthBar.h"
+#include"SpaceShip.h"
 
 class Scene
 {
@@ -25,24 +25,21 @@ private:
 	ImageSprite sky;
 	ImageSprite bullet;
 	ImageSprite enemy_bullet;
-	ImageSprite space_ship;
 	ImageSprite path_comp;
-	ImageSprite enemy_ship;
-	HealthBar enemy_health_bar;
-	HealthBar space_ship_health_bar;
 private:
-	int enemy_health = 1000;
-	int space_ship_health = 1000;
-private:
-	DirectX::XMVECTOR space_ship_direction = DirectX::XMVectorZero();
-	float space_ship_angle = 0.0f;
+	SpaceShip player_ship;
+	SpaceShip enemy_ship;
 private:
 	std::deque<path_component> path_components;
 private:
 	std::queue<Bullet> bullets;
 	std::queue<Bullet> enemy_bullets;
 public:
-	Scene(CoreEngine& engine) : engine(engine) , enemy_health_bar(engine , 1000) , space_ship_health_bar(engine,1000){}
+	Scene(CoreEngine& engine) : engine(engine), player_ship(engine, SpaceShip::Type::Ally), enemy_ship(engine, SpaceShip::Type::Enemy)
+	{
+		player_ship.MoveTo(509, 580);
+		enemy_ship.MoveTo(509, 250);
+	}
 private:
 	bool IsColliding(DirectX::XMVECTOR pos1 , unsigned int half_w1 , unsigned int half_h1, DirectX::XMVECTOR pos2 , unsigned int half_w2 , unsigned int half_h2)
 	{
@@ -112,7 +109,7 @@ public:
 			
 			if (Colliding)
 			{
-				enemy_health -= 5;
+				enemy_ship.AddHealth(-5);
 				continue;
 			}
 
@@ -139,11 +136,11 @@ public:
 			bool OutOfWindow = DirectX::XMVectorGetX(DirectX::XMVectorLess(pos, DirectX::XMVectorSet(0, 0, 0, 0)));
 			OutOfWindow |= (bool)DirectX::XMVectorGetX(DirectX::XMVectorGreater(pos, DirectX::XMVectorSet(1018, 700, 0, 0)));
 
-			auto Colliding = IsColliding(pos, bullet.bullet.GetWidth() / 2, bullet.bullet.GetHeight() / 2, space_ship.GetPosition(), space_ship.GetWidth() / 2, space_ship.GetHeight() / 2);
+			auto Colliding = IsColliding(pos, bullet.bullet.GetWidth() / 2, bullet.bullet.GetHeight() / 2, player_ship.GetPosition(), player_ship.GetWidth() / 2, player_ship.GetHeight() / 2);
 
 			if (Colliding)
 			{
-				space_ship_health -= 5;
+				player_ship.AddHealth(-5);
 				continue;
 			}
 
@@ -155,17 +152,13 @@ public:
 		}
 
 		enemy_ship.Draw(engine);
-		enemy_health_bar.SetHealth(enemy_health);
-		enemy_health_bar.Draw();
-		space_ship.Draw(engine);
-		space_ship_health_bar.SetHealth(space_ship_health);
-		space_ship_health_bar.Draw();
+		player_ship.Draw(engine);
 
-		if(enemy_health <= 0)
+		if(enemy_ship.Died())
 		{
 			OnWin();
 		}
-		else if(space_ship_health <= 0)
+		else if(player_ship.Died())
 		{
 			OnLose();
 		}
@@ -182,10 +175,6 @@ public:
 	void SetEnemyBullet(ImageSprite bullet)
 	{
 		this->enemy_bullet = bullet;
-	}
-	void SetSpaceShip(ImageSprite space_ship)
-	{
-		this->space_ship = space_ship;
 	}
 	void SetPath(ImageSprite path_comp)
 	{
@@ -207,62 +196,40 @@ public:
 		}
 		this->path_comp = path_comp;
 	}
-	void SetEnemyShip(ImageSprite enemy_ship)
-	{
-		this->enemy_ship = enemy_ship;
-	}
 	void SetEnemyShipPosition(int x)
 	{
-		auto pos = DirectX::XMVectorSetX(enemy_ship.GetPosition(), x);
-		enemy_ship.SetPosition(pos);
-		enemy_health_bar.SetPosition(pos);
-
-		auto dist = DirectX::XMVectorSubtract(enemy_ship.GetPosition(), space_ship.GetPosition());
-		auto angle = std::atan2(DirectX::XMVectorGetY(dist), DirectX::XMVectorGetX(dist));
-		enemy_ship.SetTransformation(DirectX::XMMatrixRotationZ(angle + 1.6));
-		space_ship.SetTransformation(DirectX::XMMatrixRotationZ(angle + 1.6));
+		enemy_ship.MoveTo(x, 250);
+		enemy_ship.RotateTowards(player_ship.GetPosition());
+		player_ship.RotateTowards(enemy_ship.GetPosition());
 	}
 public:
 	void Reset()
 	{
-		enemy_health = 1000;
-		space_ship_health = 1000;
-
 		bullets = std::queue<Bullet>();
 		enemy_bullets = std::queue<Bullet>();
 
+		player_ship.Reset();
+		enemy_ship.Reset();
 	}
 public:
 	void SpaceShipController(CustomWindow& window)
 	{
-		space_ship.SetPosition(DirectX::XMVectorSet(window.mouse.GetX(), 580, 0, 0));
-		//auto middle = DirectX::XMVectorSet(509, 350, 0, 0);
-
-		auto middle = enemy_ship.GetPosition();
-
-		auto pos = space_ship.GetPosition();
-		auto dist = DirectX::XMVectorSubtract(middle, pos);
-		auto angle = std::atan2(DirectX::XMVectorGetY(dist), DirectX::XMVectorGetX(dist));
-		space_ship.SetTransformation(DirectX::XMMatrixRotationZ(angle + 1.6));
-		enemy_ship.SetTransformation(DirectX::XMMatrixRotationZ(angle + 1.6));
-
-		space_ship_direction = DirectX::XMVector2Normalize(dist);
-		space_ship_angle = angle;
-
-		space_ship_health_bar.SetPosition(pos);
+		player_ship.MoveTo(window.mouse.GetX(), 580);
+		player_ship.RotateTowards(enemy_ship.GetPosition());
+		enemy_ship.RotateTowards(player_ship.GetPosition());
 	}
 	void FireBullet()
 	{
 		auto bullet1 = bullet;
 		auto bullet2 = bullet;
 
-		bullet1.SetPosition(DirectX::XMVectorSet(DirectX::XMVectorGetX(space_ship.GetPosition()) - 30, 550, 0, 0));
-		bullet2.SetPosition(DirectX::XMVectorSet(DirectX::XMVectorGetX(space_ship.GetPosition()) + 30, 550, 0, 0));
+		bullet1.SetPosition(DirectX::XMVectorSet(DirectX::XMVectorGetX(player_ship.GetPosition()) - 30, 550, 0, 0));
+		bullet2.SetPosition(DirectX::XMVectorSet(DirectX::XMVectorGetX(player_ship.GetPosition()) + 30, 550, 0, 0));
 
-		bullet1.SetTransformation(DirectX::XMMatrixRotationZ(space_ship_angle));
-		bullet2.SetTransformation(DirectX::XMMatrixRotationZ(space_ship_angle));
+		bullet1.SetTransformation(DirectX::XMMatrixRotationZ(player_ship.GetRotation()));
+		bullet2.SetTransformation(DirectX::XMMatrixRotationZ(player_ship.GetRotation()));
 
-		auto velocity = DirectX::XMVectorScale(space_ship_direction, 5.0f);
+		auto velocity = DirectX::XMVectorScale(player_ship.GetDirection(), 5.0f);
 
 		bullets.push({ velocity, bullet1 });
 		bullets.push({ velocity, bullet2 });
@@ -275,14 +242,10 @@ public:
 		bullet1.SetPosition(DirectX::XMVectorSet(DirectX::XMVectorGetX(enemy_ship.GetPosition()) - 30, 280, 0, 0));
 		bullet2.SetPosition(DirectX::XMVectorSet(DirectX::XMVectorGetX(enemy_ship.GetPosition()) + 30, 280, 0, 0));
 
-		auto dist = DirectX::XMVectorSubtract(space_ship.GetPosition(), enemy_ship.GetPosition());
-
-		auto angle = std::atan2(DirectX::XMVectorGetY(dist), DirectX::XMVectorGetX(dist));
-
-		bullet1.SetTransformation(DirectX::XMMatrixRotationZ(angle));
-		bullet2.SetTransformation(DirectX::XMMatrixRotationZ(angle));
-
-		auto velocity = DirectX::XMVectorScale(DirectX::XMVector2Normalize(dist), 5.0f);
+		bullet1.SetTransformation(DirectX::XMMatrixRotationZ(enemy_ship.GetRotation() - DirectX::XM_PI));
+		bullet2.SetTransformation(DirectX::XMMatrixRotationZ(enemy_ship.GetRotation() - DirectX::XM_PI));
+		
+		auto velocity = DirectX::XMVectorScale(enemy_ship.GetDirection(), -5.0f);
 
 		enemy_bullets.push({ velocity, bullet1 });
 		enemy_bullets.push({ velocity, bullet2 });

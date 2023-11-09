@@ -44,6 +44,10 @@ public:
 
 		bar.SetTransformation(DirectX::XMMatrixScaling(p, 1.0f, 1.0f) * DirectX::XMMatrixTranslationFromVector(pos));
 	}
+	unsigned int GetHealth()
+	{
+		return health;
+	}
 	void SetPosition(DirectX::XMVECTOR position)
 	{
 		bar.SetPosition(position);

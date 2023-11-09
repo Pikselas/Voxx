@@ -153,6 +153,7 @@
     <ClInclude Include="HealthBar.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SpaceShip.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Engine\PixelShader.hlsl">
