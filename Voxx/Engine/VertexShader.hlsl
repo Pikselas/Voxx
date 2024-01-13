@@ -5,17 +5,22 @@ struct VertexShaderOut // this is the ouput type
 };
 
 
-cbuffer cbuff
+cbuffer sprite_transform
 {
-    float2 half_window_size;
     matrix transform;
+};
+
+cbuffer screen_size
+{
+    float2 half_screen_size;
+    float2 padding;
 };
 
 VertexShaderOut main(float2 pos : POSITION, float2 tex : TEXCOORD)
 {
     VertexShaderOut Out;
     pos = mul(transform, float4(pos, 0.0f, 1.0f)).xy;
-    pos /= half_window_size;
+    pos /= half_screen_size;
     pos.x -= 1.0f;
     pos.y = 1.0f - pos.y;
     Out.pos = float4(pos , 0.0f , 1.0f);

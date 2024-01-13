@@ -13,7 +13,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 {
 	StandardWindow window( "Voxx",1018 , 700 );
 	window.SetIcon(IDI_ICON1 , 256 , 256);
-	CoreEngine engine( window );
+	CoreEngine engine;
+
+	auto window_renderer = engine.CreateRenderer(window);
+	engine.SetRenderDevice(window_renderer);
 
 	auto path = engine.CreateSprite(Image("media/road-1.jpg"));
 	auto background = engine.CreateSprite(Image("media/background-1.jpg"));
@@ -108,9 +111,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	{
 		if (RemoteReady)
 		{
-			engine.ClearFrame();
+			engine.ClearFrame(window_renderer);
 			scene.Render();
-			engine.RenderFrame();
+			window_renderer.RenderFrame();
 		}
 		Window::DispatchWindowEventsNonBlocking();
 	}

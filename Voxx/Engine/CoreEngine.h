@@ -3,13 +3,14 @@
 #include<D3DCompiler.h>
 #pragma comment(lib,"D3DCompiler.lib")
 
-#include"Image.h"
-#include"ImageSprite.h"
 #include"CustomWindow.h"
+#include"MemoryRenderer.h"
+#include"WindowRenderer.h"
+#include"AnimatedSprite.h"
 
-#include "Engine.h"
+#include "RenderCommandEngine.h"
 
-class CoreEngine : public Engine
+class CoreEngine : public RenderCommandEngine
 {
 private:
 	template<typename ObjectT>
@@ -21,30 +22,17 @@ private:
 		float u, v;
 	};
 private:
-	struct VertexShaderBufferT
-	{
-		float half_window_width;
-		float half_window_height;
-		DirectX::XMMATRIX transformation;
-	};
-private:
 	ObjectManager<ID3D11Device>				graphics_device;
-	ObjectManager<ID3D11DeviceContext>		device_context;
-	ObjectManager<IDXGISwapChain>			swap_chain;
-	ObjectManager<ID3D11RenderTargetView>	render_target_view;
 private:
 	ObjectManager<ID3D11InputLayout>		input_layout;
 private:
 	ObjectManager<ID3D11VertexShader>		vertex_shader;
 	ObjectManager<ID3D11PixelShader>		pixel_shader;
 private:
-	ObjectManager<ID3D11Buffer>				vertex_shader_buffer;
+	ObjectManager<ID3D11Buffer>				vertex_shader_transform_buffer;
 	ObjectManager<ID3D11Buffer>				index_buffer;
-private:
-	const float half_window_width;
-	const float half_window_height;
 public:
-	CoreEngine(CustomWindow& window);
+	CoreEngine();
 private:
 	ObjectManager<ID3D11SamplerState>		SAMPLER_STATE;
 public:
@@ -53,9 +41,10 @@ public:
 	void SetComponent(ID3D11Buffer* vertices) override;
 public:
 	ImageSprite CreateSprite(const Image& image);
+	AnimatedSprite CreateSprite(const std::vector<Image>& frames , std::chrono::milliseconds duration , std::optional<unsigned int> repeat_count = std::nullopt);
+public:
+	MemoryRenderer CreateRenderer(Image& image);
+	WindowRenderer CreateRenderer(CustomWindow& window);
 public:
 	void Draw() override;
-public:
-	void ClearFrame();
-	void RenderFrame();
 };

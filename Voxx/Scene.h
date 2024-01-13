@@ -27,6 +27,8 @@ private:
 	ImageSprite enemy_bullet;
 	ImageSprite path_comp;
 private:
+	AnimatedSprite explosion_sprite;
+private:
 	SpaceShip player_ship;
 	SpaceShip enemy_ship;
 private:
@@ -34,11 +36,23 @@ private:
 private:
 	std::queue<Bullet> bullets;
 	std::queue<Bullet> enemy_bullets;
+	std::queue<AnimatedSprite> explosion_effects;
 public:
 	Scene(CoreEngine& engine) : engine(engine), player_ship(engine, SpaceShip::Type::Ally), enemy_ship(engine, SpaceShip::Type::Enemy)
 	{
 		player_ship.MoveTo(509, 580);
 		enemy_ship.MoveTo(509, 250);
+
+		std::vector<Image> explosion_assets;
+		explosion_assets.reserve(7);
+		
+		for (int i = 1; i <= 7; ++i)
+			explosion_assets.emplace_back("D:/blast/" + std::to_string(i) + ".png");
+
+		explosion_sprite = engine.CreateSprite(explosion_assets, std::chrono::milliseconds(500), 1);
+
+		explosion_sprite.SetTransformation(DirectX::XMMatrixScaling(0.2, 0.2, 1));
+
 	}
 private:
 	bool IsColliding(DirectX::XMVECTOR pos1 , unsigned int half_w1 , unsigned int half_h1, DirectX::XMVECTOR pos2 , unsigned int half_w2 , unsigned int half_h2)
@@ -90,6 +104,7 @@ public:
 			new_path_components.pop();
 		}
 
+		// for collision in own ship
 		size_ = bullets.size();
 		while (size_-- != 0)
 		{
@@ -109,6 +124,9 @@ public:
 			
 			if (Colliding)
 			{
+				auto effect = explosion_sprite;
+				effect.SetPosition(pos);
+				explosion_effects.push(effect);
 				enemy_ship.AddHealth(-5);
 				continue;
 			}
@@ -121,6 +139,7 @@ public:
 			bullets.push(bullet);
 		}
 
+		//for collsion in enemy ship
 		size_ = enemy_bullets.size();
 		while (size_-- != 0)
 		{
@@ -140,6 +159,9 @@ public:
 
 			if (Colliding)
 			{
+				auto effect = explosion_sprite;
+				effect.SetPosition(pos);
+				explosion_effects.push(effect);
 				player_ship.AddHealth(-5);
 				continue;
 			}
@@ -153,6 +175,16 @@ public:
 
 		enemy_ship.Draw(engine);
 		player_ship.Draw(engine);
+
+		size_ = explosion_effects.size();
+		while (size_-- != 0)
+		{
+			auto effect = explosion_effects.front();
+			explosion_effects.pop();
+			effect.Draw(engine);
+			if (!effect.IsStopped())
+				explosion_effects.push(effect);
+		}
 
 		if(enemy_ship.Died())
 		{
@@ -207,6 +239,7 @@ public:
 	{
 		bullets = std::queue<Bullet>();
 		enemy_bullets = std::queue<Bullet>();
+		explosion_effects = std::queue<AnimatedSprite>();
 
 		player_ship.Reset();
 		enemy_ship.Reset();

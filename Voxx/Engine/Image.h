@@ -15,7 +15,7 @@ struct ColorType
 class Image
 {
 private:
-	GDIPlusManager manager;
+	static GDIPlusManager manager;
 	std::unique_ptr<Gdiplus::Bitmap> bitmap;
 public:
 	Image(const std::filesystem::path& file);
@@ -27,7 +27,9 @@ public:
 	void SetPixel(unsigned int x, unsigned int y, ColorType color);
 	void DrawLine(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, ColorType color);
 	void Clear(ColorType color = {});
+	ColorType* Raw();
 	const ColorType* Raw() const;
 public:
 	Image& operator=(const Image& img);
+	void Save(const std::filesystem::path& file) const;
 };

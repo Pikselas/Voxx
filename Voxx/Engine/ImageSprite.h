@@ -15,13 +15,13 @@ private:
 	unsigned int width;
 	unsigned int height;
 public:
-	void Draw(Engine& engine) const override
+	void Draw(RenderCommandEngine& engine) const override
 	{
 		engine.SetComponent(GetTransformation());
 		DrawNonTransformed(engine);
 	}
 
-	void DrawNonTransformed(Engine& engine) const override
+	void DrawNonTransformed(RenderCommandEngine& engine) const override
 	{
 		engine.SetComponent(index_buffer.Get());
 		engine.SetComponent(TEXTURE_VIEW.Get());
