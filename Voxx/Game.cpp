@@ -20,15 +20,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	auto path = engine.CreateSprite(Image("C:/Users/Aritra Maji/Downloads/path.png"));
 	auto background = engine.CreateSprite(Image("media/background-1.jpg"));
-	auto bullet = engine.CreateSprite(Image("media/bullet.png"));
-	auto enemy_bullet = engine.CreateSprite(Image("media/bullet-2.png"));
+	auto laser_bullet = engine.CreateSprite(Image("media/bullet.png"));
 
 	Scene scene(engine);
 
 	scene.SetPath(path);
-	scene.SetBullet(bullet);
-	scene.SetEnemyBullet(enemy_bullet);
 	scene.SetSky(background);
+	scene.SetLaserBullet(laser_bullet);
 
 	auto lib = LoadLibrary("client.dll");
 	if (lib == NULL)
@@ -132,22 +130,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		};
 
 	float f = 0.1;*/
-
-	struct Bult
-	{
-		DirectX::XMVECTOR control_point;
-		ImageSprite bullet;
-	};
-
-	std::vector<Bult> v_bult;
-	
-	for (int i{}; i < 1000; ++i)
-	{
-		int x = std::random_device{}() % window.GetWidth();
-		int y = std::random_device{}() % window.GetHeight();
-
-		v_bult.emplace_back(DirectX::XMVectorSet(x, y, 0, 1), bullet);
-	}
 
 	while (window.IsOpen())
 	{

@@ -17,16 +17,10 @@ private:
 		float scale_y;
 		ImageSprite component;
 	};
-	struct Bullet
-	{
-		DirectX::XMVECTOR velocity;
-		ImageSprite bullet;
-	};
 private:
 	ImageSprite sky;
-	ImageSprite bullet;
-	ImageSprite enemy_bullet;
 	ImageSprite path_comp;
+	ImageSprite laser_bullet;
 private:
 	AnimatedSprite explosion_sprite;
 private:
@@ -35,11 +29,9 @@ private:
 private:
 	std::deque<path_component> path_components;
 private:
-	std::queue<Bullet> bullets;
-	std::queue<Bullet> enemy_bullets;
-
-	std::queue<std::unique_ptr<Projectile>> blts;
-
+	std::queue<std::unique_ptr<Projectile>> player_projectiles;
+	std::queue<std::unique_ptr<Projectile>> enemy_projectiles;
+private:
 	std::queue<AnimatedSprite> explosion_effects;
 public:
 	Scene(CoreEngine& engine) : engine(engine), player_ship(engine, SpaceShip::Type::Ally), enemy_ship(engine, SpaceShip::Type::Enemy)
@@ -108,23 +100,24 @@ public:
 			new_path_components.pop();
 		}
 
-		// for collision in own ship
-		size_ = bullets.size();
+		// for collision in player's ship from enemy projectiles
+		size_ = player_projectiles.size();
 		while (size_-- != 0)
 		{
-			auto bullet = bullets.front();
-			bullets.pop();
+			auto projectile = std::move(player_projectiles.front());
+			player_projectiles.pop();
 
-			bullet.bullet.Draw(engine);
+			projectile->UpdatePosition();
+			projectile->Draw(engine);
 
-			auto pos = bullet.bullet.GetPosition();
-			pos = DirectX::XMVectorAdd(pos, bullet.velocity);
-			bullet.bullet.SetPosition(pos);
+			auto pos = projectile->GetPosition();
 
 			bool OutOfWindow = DirectX::XMVectorGetX(DirectX::XMVectorLess(pos, DirectX::XMVectorSet(0, 0, 0, 0)));
 			OutOfWindow |= (bool)DirectX::XMVectorGetX(DirectX::XMVectorGreater(pos, DirectX::XMVectorSet(1018, 700, 0, 0)));
 
-			auto Colliding = IsColliding(pos, bullet.bullet.GetWidth()/2, bullet.bullet.GetHeight() /2, enemy_ship.GetPosition(), enemy_ship.GetWidth() / 2, enemy_ship.GetHeight() / 2);
+			auto [width, height] = projectile->GetSideLength();
+
+			auto Colliding = IsColliding(pos, width/2, height/2, enemy_ship.GetPosition(), enemy_ship.GetWidth() / 2, enemy_ship.GetHeight() / 2);
 			
 			if (Colliding)
 			{
@@ -140,26 +133,27 @@ public:
 				continue;
 			}
 
-			bullets.push(bullet);
+			player_projectiles.emplace(std::move(projectile));
 		}
 
 		//for collsion in enemy ship
-		size_ = enemy_bullets.size();
+		size_ = enemy_projectiles.size();
 		while (size_-- != 0)
 		{
-			auto bullet = enemy_bullets.front();
-			enemy_bullets.pop();
+			auto projectile = std::move(enemy_projectiles.front());
+			enemy_projectiles.pop();
 
-			bullet.bullet.Draw(engine);
+			projectile->UpdatePosition();
+			projectile->Draw(engine);
 
-			auto pos = bullet.bullet.GetPosition();
-			pos = DirectX::XMVectorAdd(pos, bullet.velocity);
-			bullet.bullet.SetPosition(pos);
+			auto pos = projectile->GetPosition();
 
 			bool OutOfWindow = DirectX::XMVectorGetX(DirectX::XMVectorLess(pos, DirectX::XMVectorSet(0, 0, 0, 0)));
 			OutOfWindow |= (bool)DirectX::XMVectorGetX(DirectX::XMVectorGreater(pos, DirectX::XMVectorSet(1018, 700, 0, 0)));
 
-			auto Colliding = IsColliding(pos, bullet.bullet.GetWidth() / 2, bullet.bullet.GetHeight() / 2, player_ship.GetPosition(), player_ship.GetWidth() / 2, player_ship.GetHeight() / 2);
+			auto [width, height] = projectile->GetSideLength();
+
+			auto Colliding = IsColliding(pos, width/2, height/2, player_ship.GetPosition(), player_ship.GetWidth() / 2, player_ship.GetHeight() / 2);
 
 			if (Colliding)
 			{
@@ -174,17 +168,8 @@ public:
 			{
 				continue;
 			}
-			enemy_bullets.push(bullet);
-		}
-
-		size_ = blts.size();
-		while (size_-- != 0)
-		{
-			auto blt = std::move(blts.front());
-			blts.pop();
-			blt->Update();
-			blt->Draw(engine);
-			blts.emplace(std::move(blt));
+			
+			enemy_projectiles.emplace(std::move(projectile));
 		}
 
 		enemy_ship.Draw(engine);
@@ -214,14 +199,6 @@ public:
 		this->sky = sky;
 		this->sky.SetPosition(DirectX::XMVectorSet(509, 240, 0, 0));
 	}
-	void SetBullet(ImageSprite bullet)
-	{
-		this->bullet = bullet;
-	}
-	void SetEnemyBullet(ImageSprite bullet)
-	{
-		this->enemy_bullet = bullet;
-	}
 	void SetPath(ImageSprite path_comp)
 	{
 		int pos_y = 350;
@@ -242,6 +219,10 @@ public:
 		}
 		this->path_comp = path_comp;
 	}
+	void SetLaserBullet(ImageSprite bullet)
+	{
+		laser_bullet = bullet;
+	}
 	void SetEnemyShipPosition(int x)
 	{
 		enemy_ship.MoveTo(x, 250);
@@ -251,8 +232,8 @@ public:
 public:
 	void Reset()
 	{
-		bullets = std::queue<Bullet>();
-		enemy_bullets = std::queue<Bullet>();
+		player_projectiles = decltype(player_projectiles){};
+		enemy_projectiles = decltype(enemy_projectiles){};
 		explosion_effects = std::queue<AnimatedSprite>();
 
 		player_ship.Reset();
@@ -281,15 +262,19 @@ public:
 		bullets.push({ velocity, bullet1 });
 		bullets.push({ velocity, bullet2 });*/
 
-		blts.emplace( std::make_unique<LaserBullet>(engine , 
-					  DirectX::XMVectorSet(DirectX::XMVectorGetX(player_ship.GetPosition()) - 30, 550, 0, 0),
-					  DirectX::XMVectorScale(player_ship.GetDirection(), 5.0f)
+		player_projectiles.emplace
+		( 
+			std::make_unique<LaserBullet>
+			(
+				laser_bullet, 
+				DirectX::XMVectorSet(DirectX::XMVectorGetX(player_ship.GetPosition()) - 30, 550, 0, 0),
+				DirectX::XMVectorScale(player_ship.GetDirection(), 5.0f)
 			)
 		);
 	}
 	void FireEnemyBullet()
 	{
-		auto bullet1 = enemy_bullet;
+		/*auto bullet1 = enemy_bullet;
 		auto bullet2 = enemy_bullet;
 
 		bullet1.SetPosition(DirectX::XMVectorSet(DirectX::XMVectorGetX(enemy_ship.GetPosition()) - 30, 280, 0, 0));
@@ -301,6 +286,17 @@ public:
 		auto velocity = DirectX::XMVectorScale(enemy_ship.GetDirection(), -5.0f);
 
 		enemy_bullets.push({ velocity, bullet1 });
-		enemy_bullets.push({ velocity, bullet2 });
+		enemy_bullets.push({ velocity, bullet2 });*/
+
+		enemy_projectiles.emplace
+		(
+			std::make_unique<LaserBullet>
+			(
+				laser_bullet,
+				DirectX::XMVectorSet(DirectX::XMVectorGetX(enemy_ship.GetPosition()) - 30, 280, 0, 0),
+				DirectX::XMVectorScale(enemy_ship.GetDirection(), 5.0f)
+			)
+		);
+
 	}
 };

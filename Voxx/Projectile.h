@@ -8,9 +8,9 @@ protected:
 protected:
 	ImageSprite projectile;
 protected:
-	Projectile(CoreEngine& engine, std::filesystem::path path , DirectX::XMVECTOR control_parameter , DirectX::XMVECTOR position)
+	Projectile(ImageSprite sprite, DirectX::XMVECTOR control_parameter , DirectX::XMVECTOR position)
 		: 
-	control_parameter(control_parameter), projectile(engine.CreateSprite(Image{path}))
+	control_parameter(control_parameter), projectile(sprite)
 	{
 		projectile.SetPosition(position);
 	}
@@ -28,5 +28,5 @@ public:
 		return { projectile.GetWidth() , projectile.GetHeight() };
 	}
 public:
-	virtual void Update() = 0;
+	virtual void UpdatePosition() = 0;
 };

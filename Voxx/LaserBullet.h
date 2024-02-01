@@ -4,15 +4,15 @@
 class LaserBullet : public Projectile
 {
 public:
-	LaserBullet(CoreEngine& engine , DirectX::XMVECTOR position , DirectX::XMVECTOR velocity) 
+	LaserBullet(ImageSprite sprite , DirectX::XMVECTOR position , DirectX::XMVECTOR velocity) 
 		: 
-	Projectile(engine , "media/bullet.png" , velocity , position)
+	Projectile(sprite , velocity , position)
 	{
 		auto direction = std::atan2(DirectX::XMVectorGetY(velocity), DirectX::XMVectorGetX(velocity));
 		projectile.SetTransformation(DirectX::XMMatrixRotationZ(direction));
 	}
 public:
-	void Update() override
+	void UpdatePosition() override
 	{
 		projectile.SetPosition(DirectX::XMVectorAdd(projectile.GetPosition(), control_parameter));
 	}
