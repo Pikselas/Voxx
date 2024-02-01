@@ -151,6 +151,8 @@
     <ClInclude Include="Engine\Window.h" />
     <ClInclude Include="GameEvents.h" />
     <ClInclude Include="HealthBar.h" />
+    <ClInclude Include="LaserBullet.h" />
+    <ClInclude Include="Projectile.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SpaceShip.h" />

@@ -3,7 +3,8 @@
 #include<queue>
 #include "Engine/CoreEngine.h"
 
-#include"SpaceShip.h"
+#include "SpaceShip.h"
+#include "LaserBullet.h"
 
 class Scene
 {
@@ -36,6 +37,9 @@ private:
 private:
 	std::queue<Bullet> bullets;
 	std::queue<Bullet> enemy_bullets;
+
+	std::queue<std::unique_ptr<Projectile>> blts;
+
 	std::queue<AnimatedSprite> explosion_effects;
 public:
 	Scene(CoreEngine& engine) : engine(engine), player_ship(engine, SpaceShip::Type::Ally), enemy_ship(engine, SpaceShip::Type::Enemy)
@@ -173,6 +177,16 @@ public:
 			enemy_bullets.push(bullet);
 		}
 
+		size_ = blts.size();
+		while (size_-- != 0)
+		{
+			auto blt = std::move(blts.front());
+			blts.pop();
+			blt->Update();
+			blt->Draw(engine);
+			blts.emplace(std::move(blt));
+		}
+
 		enemy_ship.Draw(engine);
 		player_ship.Draw(engine);
 
@@ -253,7 +267,7 @@ public:
 	}
 	void FireBullet()
 	{
-		auto bullet1 = bullet;
+		/*auto bullet1 = bullet;
 		auto bullet2 = bullet;
 
 		bullet1.SetPosition(DirectX::XMVectorSet(DirectX::XMVectorGetX(player_ship.GetPosition()) - 30, 550, 0, 0));
@@ -265,7 +279,13 @@ public:
 		auto velocity = DirectX::XMVectorScale(player_ship.GetDirection(), 5.0f);
 
 		bullets.push({ velocity, bullet1 });
-		bullets.push({ velocity, bullet2 });
+		bullets.push({ velocity, bullet2 });*/
+
+		blts.emplace( std::make_unique<LaserBullet>(engine , 
+					  DirectX::XMVectorSet(DirectX::XMVectorGetX(player_ship.GetPosition()) - 30, 550, 0, 0),
+					  DirectX::XMVectorScale(player_ship.GetDirection(), 5.0f)
+			)
+		);
 	}
 	void FireEnemyBullet()
 	{

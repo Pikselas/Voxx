@@ -83,6 +83,12 @@
     <ClInclude Include="SpaceShip.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Projectile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LaserBullet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Engine\VertexShader.hlsl">

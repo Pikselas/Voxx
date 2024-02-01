@@ -50,6 +50,7 @@ private:
 				current_frame += elapsed.count() / per_frame_duration.count();
 				if (current_frame >= frames.size())
 				{
+					current_frame = 0;
 					if (repeat_count)
 					{
 						if (*repeat_count != 0)
