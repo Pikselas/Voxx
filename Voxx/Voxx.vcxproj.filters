@@ -89,6 +89,9 @@
     <ClInclude Include="LaserBullet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="TargetedMissile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Engine\VertexShader.hlsl">

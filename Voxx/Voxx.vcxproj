@@ -156,6 +156,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SpaceShip.h" />
+    <ClInclude Include="TargetedMissile.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Engine\PixelShader.hlsl">

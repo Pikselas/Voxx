@@ -1,10 +1,12 @@
 #pragma once
-#include<stack>
-#include<queue>
+#include <stack>
+#include <queue>
+#include <random>
 #include "Engine/CoreEngine.h"
 
 #include "SpaceShip.h"
 #include "LaserBullet.h"
+#include "TargetedMissile.h"
 
 class Scene
 {
@@ -298,5 +300,17 @@ public:
 			)
 		);
 
+	}
+
+	void FireTargetedMissile()
+	{
+		bool control_ = static_cast<bool>(std::random_device{}() % 2);
+		DirectX::XMVECTOR control_point;
+		if (control_)
+			control_point = DirectX::XMVectorSet(std::random_device{}() % 509, std::random_device{}() % 700, 0, 1);
+		else
+			control_point = DirectX::XMVectorSet(509 + std::random_device{}() % 509, std::random_device{}() % 700, 0, 1);
+
+		player_projectiles.emplace(std::make_unique<TargetedMissile>(laser_bullet , player_ship.GetPosition() , control_point , enemy_ship));
 	}
 };

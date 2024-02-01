@@ -87,6 +87,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			SendEvent(&e, sizeof(e));
 			scene.FireBullet();
 		};
+	window.mouse.OnRightPress = [&](auto&)
+		{
+			scene.FireTargetedMissile();
+		};
 
 	scene.OnLose = [&]()
 		{

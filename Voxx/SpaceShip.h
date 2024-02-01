@@ -47,19 +47,19 @@ public:
 		return health_bar.GetHealth() == 0;
 	}
 public:
-	auto GetPosition()
+	auto GetPosition() const
 	{
 		return sprite.GetPosition();
 	}
-	auto GetHeight()
+	auto GetHeight() const
 	{
 		return sprite.GetHeight();
 	}
-	auto GetWidth()
+	auto GetWidth() const
 	{
 		return sprite.GetWidth();
 	}
-	auto GetDirection()
+	auto GetDirection() const
 	{
 		return direction;
 	}
