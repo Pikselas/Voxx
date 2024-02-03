@@ -16,6 +16,9 @@
     <Filter Include="Engine">
       <UniqueIdentifier>{cef10c56-d95c-40c5-b070-e4ee061b8442}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Skills">
+      <UniqueIdentifier>{484a0c24-32c2-4938-babe-2662a381aeee}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\CoreEngine.cpp">
@@ -77,7 +80,7 @@
     <ClInclude Include="GameEvents.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="HealthBar.h">
+    <ClInclude Include="StatusBar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SpaceShip.h">
@@ -91,6 +94,12 @@
     </ClInclude>
     <ClInclude Include="TargetedMissile.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SkillEquipment.h">
+      <Filter>Header Files\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="HealCircle.h">
+      <Filter>Header Files\Skills</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

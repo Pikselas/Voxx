@@ -1,41 +1,33 @@
 #pragma once
 #include"Engine/CoreEngine.h"
 
-class HealthBar
+class StatusBar
 {
 private:
 	ImageSprite bar;
 private:
 	CoreEngine& engine;
 private:
-	const unsigned int max_health;
-	unsigned int health;
+	const unsigned int max_stat;
+	unsigned int current_stat;
 public:
-	HealthBar(CoreEngine& engine, unsigned int max_health, unsigned int width = 100, unsigned int height = 20) : max_health(max_health), engine(engine), health(max_health)
+	StatusBar(CoreEngine& engine, unsigned int max_stat, ColorType color = { 0 , 0 , 255 } ,unsigned int width = 100, unsigned int height = 20) : max_stat(max_stat), engine(engine), current_stat(max_stat)
 	{
 		Image bar_(width, height);
-		bar_.Clear({ 0 , 0 , 255 });
-		for (int i = 0; i < width; ++i)
-		{
-			for (int j = 0; j < 2; ++j)
-			{
-				bar_.SetPixel(i, j, { 200 , 255 , 0 });
-				bar_.SetPixel(i, height - j, { 200 , 255 , 0 });
-			}
-		}
+		bar_.Clear(color);
 		bar = engine.CreateSprite(bar_);
 	}
 public:
-	void SetHealth(unsigned int health)
+	void SetStatus(unsigned int stat)
 	{
-		if (health > max_health)
+		if (stat > max_stat)
 		{
-			health = max_health;
+			stat = max_stat;
 		}
 
-		this->health = health;
+		current_stat = stat;
 
-		float p = (float)health / (float)max_health;
+		float p = (float)current_stat / (float)max_stat;
 		auto size = (bar.GetWidth() - (bar.GetWidth() * p)) / 2;
 		//auto pos = DirectX::XMVector3Transform(bar.GetPosition(), DirectX::XMMatrixScaling(p, 1.0f, 1.0f));
 		//pos = DirectX::XMVectorSubtract(pos, bar.GetPosition());
@@ -44,9 +36,9 @@ public:
 
 		bar.SetTransformation(DirectX::XMMatrixScaling(p, 1.0f, 1.0f) * DirectX::XMMatrixTranslationFromVector(pos));
 	}
-	unsigned int GetHealth()
+	unsigned int GetStatus() const
 	{
-		return health;
+		return current_stat;
 	}
 	void SetPosition(DirectX::XMVECTOR position)
 	{

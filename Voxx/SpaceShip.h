@@ -1,10 +1,13 @@
 #pragma once
-#include"HealthBar.h"
+#include <array>
+#include "StatusBar.h"
+#include "SkillEquipment.h"
 
 class SpaceShip
 {
 private:
-	HealthBar health_bar;
+	StatusBar health_bar;
+	StatusBar skillpoint_bar;
 	ImageSprite sprite;
 public:
 	enum class Type
@@ -15,11 +18,15 @@ public:
 private:
 	Type type;
 public:
+	SkillEquipment* Skill;
+public:
 	SpaceShip(CoreEngine& engine, Type type)
 		:
-		type(type),
-		health_bar(engine, 1000),
-		sprite(engine.CreateSprite(Image{ type == SpaceShip::Type::Ally ? "media/space_ship.png" : "media/Enemy_ship.png" }))
+	type(type),
+	health_bar(engine,1000),
+	skillpoint_bar(engine, 100, {250 , 50 , 50} , 100 , 10),
+	Skill( nullptr ),
+	sprite(engine.CreateSprite(Image{ type == SpaceShip::Type::Ally ? "media/space_ship.png" : "media/Enemy_ship.png" }))
 	{}
 private:
 	DirectX::XMVECTOR direction = DirectX::XMVectorZero();
@@ -27,7 +34,8 @@ public:
 	void MoveTo(unsigned int x, unsigned int y)
 	{
 		sprite.SetPosition(DirectX::XMVectorSet(x, y, 0, 1));
-		health_bar.SetPosition(DirectX::XMVectorSet(x, y, 0, 1));
+		skillpoint_bar.SetPosition(DirectX::XMVectorSet(x, y - 5, 0, 1));
+		health_bar.SetPosition(DirectX::XMVectorSet(x, y + 5, 0, 1));
 	}
 	void RotateTowards(DirectX::XMVECTOR pos)
 	{
@@ -40,11 +48,19 @@ public:
 	}
 	void AddHealth(int amount)
 	{
-		health_bar.SetHealth(std::clamp((int)health_bar.GetHealth() + amount, 0, 1000));
+		health_bar.SetStatus(std::clamp((int)health_bar.GetStatus() + amount, 0, 1000));
+	}
+	void AddSkillPoint(int amount)
+	{
+		skillpoint_bar.SetStatus(std::clamp((int)skillpoint_bar.GetStatus() + amount, 0, 100));
+	}
+	unsigned int GetSkillPoint() const
+	{
+		return skillpoint_bar.GetStatus();
 	}
 	bool Died()
 	{
-		return health_bar.GetHealth() == 0;
+		return health_bar.GetStatus() == 0;
 	}
 public:
 	auto GetPosition() const
@@ -66,12 +82,19 @@ public:
 public:
 	void Reset()
 	{
-		health_bar.SetHealth(1000);
+		health_bar.SetStatus(1000);
+		skillpoint_bar.SetStatus(100);
 	}
 public:
 	void Draw(CoreEngine& engine)
 	{
 		sprite.Draw(engine);
 		health_bar.Draw();
+		skillpoint_bar.Draw();
+		
+		if (Skill != nullptr)
+		{
+			Skill->ApplySkill(*this , engine);
+		}
 	}
 };

@@ -150,11 +150,13 @@
     <ClInclude Include="Engine\StandardWindow.h" />
     <ClInclude Include="Engine\Window.h" />
     <ClInclude Include="GameEvents.h" />
-    <ClInclude Include="HealthBar.h" />
+    <ClInclude Include="HealCircle.h" />
+    <ClInclude Include="StatusBar.h" />
     <ClInclude Include="LaserBullet.h" />
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SkillEquipment.h" />
     <ClInclude Include="SpaceShip.h" />
     <ClInclude Include="TargetedMissile.h" />
   </ItemGroup>

@@ -1,13 +1,14 @@
-#include"resource.h"
-#include"Scene.h"
-#include"Engine/StandardWindow.h"
+#include "resource.h"
+#include "Scene.h"
+#include "Engine/StandardWindow.h"
 
-#include<queue>
-#include<stack>
-#include<random>
-#include<thread>
+#include <queue>
+#include <stack>
+#include <random>
+#include <thread>
 
-#include"GameEvents.h"
+#include "GameEvents.h"
+#include "HealCircle.h"
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -22,11 +23,25 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	auto background = engine.CreateSprite(Image("media/background-1.jpg"));
 	auto laser_bullet = engine.CreateSprite(Image("media/bullet.png"));
 
+	auto heal_skill = HealCircle(engine);
+
 	Scene scene(engine);
 
 	scene.SetPath(path);
 	scene.SetSky(background);
 	scene.SetLaserBullet(laser_bullet);
+
+	window.keyboard.OnKeyPress = [&](auto ev)
+		{
+			if (ev.KEY_CODE == 'A')
+			{
+				scene.SetSkill(&heal_skill);
+			}
+			else if (ev.KEY_CODE == 'D')
+			{
+				scene.SetSkill(nullptr);
+			}
+		};
 
 	auto lib = LoadLibrary("client.dll");
 	if (lib == NULL)
@@ -108,32 +123,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			SendEvent(&ev, sizeof(ev));
 			scene.Reset();
 		};
-
-	std::function<std::vector<DirectX::XMVECTOR>(float, std::vector<DirectX::XMVECTOR>)> GetCurvePoint = [&](float t, std::vector<DirectX::XMVECTOR> control_points)
-		{
-			if (control_points.size() > 1)
-			{
-				std::vector<DirectX::XMVECTOR> new_points;
-				for (int i = 0; i < control_points.size() - 1; ++i)
-				{
-					new_points.emplace_back(DirectX::XMVectorLerp(control_points[i], control_points[i + 1], t));
-				}
-				return GetCurvePoint(t, new_points);
-			}
-			return control_points;
-		};
-
-	auto p1 = DirectX::XMVectorSet(509, 700, 0, 1);
-	auto p2 = DirectX::XMVectorSet(0, 0, 0, 1);
-	auto p3 = DirectX::XMVectorSet(0, 0, 0, 1);
-
-	/*window.mouse.OnMove = [&](auto& wnd)
-		{
-			auto [x, y] = wnd.mouse.GetXY();
-			p3 = DirectX::XMVectorSet( x , y , 0 , 1 );
-		};
-
-	float f = 0.1;*/
 
 	while (window.IsOpen())
 	{
