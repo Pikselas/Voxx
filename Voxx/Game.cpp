@@ -10,7 +10,9 @@
 #include "GameEvents.h"
 #include "HealShield.h"
 
+#include "ExplosionEffect.h"
 #include "HealShieldEffect.h"
+
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -26,6 +28,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	auto laser_bullet = engine.CreateSprite(Image("media/bullet.png"));
 
 	auto shield_effect = HealShieldEffect(engine);
+	//auto explosion_effect = ExplosionEffect(engine);
 
 	Scene scene(engine);
 

@@ -7,6 +7,7 @@
 #include "SpaceShip.h"
 #include "LaserBullet.h"
 #include "TargetedMissile.h"
+#include "ExplosionEffect.h"
 
 template<typename T>
 concept SkillEquipmentT = std::is_base_of_v<SkillEquipment,T>;
@@ -27,33 +28,27 @@ private:
 	ImageSprite path_comp;
 	ImageSprite laser_bullet;
 private:
-	AnimatedSprite explosion_sprite;
-private:
 	SpaceShip player_ship;
 	SpaceShip enemy_ship;
+private:
+	ExplosionEffect explosion_effect;
 private:
 	std::deque<path_component> path_components;
 private:
 	std::queue<std::unique_ptr<Projectile>> player_projectiles;
 	std::queue<std::unique_ptr<Projectile>> enemy_projectiles;
 private:
-	std::queue<AnimatedSprite> explosion_effects;
+	std::queue<ExplosionEffect> explosion_effects;
 public:
-	Scene(CoreEngine& engine) : engine(engine), player_ship(engine, SpaceShip::Type::Ally), enemy_ship(engine, SpaceShip::Type::Enemy)
+	Scene(CoreEngine& engine) 
+		: 
+	engine(engine), 
+	player_ship(engine, SpaceShip::Type::Ally),
+	enemy_ship(engine, SpaceShip::Type::Enemy),
+	explosion_effect(engine)
 	{
 		player_ship.MoveTo(509, 580);
 		enemy_ship.MoveTo(509, 250);
-
-		std::vector<Image> explosion_assets;
-		explosion_assets.reserve(7);
-		
-		for (int i = 1; i <= 7; ++i)
-			explosion_assets.emplace_back("D:/blast/" + std::to_string(i) + ".png");
-
-		explosion_sprite = engine.CreateSprite(explosion_assets, std::chrono::milliseconds(500), 1);
-
-		explosion_sprite.SetTransformation(DirectX::XMMatrixScaling(0.2, 0.2, 1));
-
 	}
 private:
 	bool IsColliding(DirectX::XMVECTOR pos1 , unsigned int half_w1 , unsigned int half_h1, DirectX::XMVECTOR pos2 , unsigned int half_w2 , unsigned int half_h2)
@@ -126,8 +121,8 @@ public:
 			
 			if (Colliding)
 			{
-				auto effect = explosion_sprite;
-				effect.SetPosition(pos);
+				auto effect = explosion_effect;
+				effect.SetLocation(pos);
 				explosion_effects.push(effect);
 				enemy_ship.AddHealth(-5);
 				continue;
@@ -162,8 +157,8 @@ public:
 
 			if (Colliding)
 			{
-				auto effect = explosion_sprite;
-				effect.SetPosition(pos);
+				auto effect = explosion_effect;
+				effect.SetLocation(pos);
 				explosion_effects.push(effect);
 				player_ship.AddHealth(-5);
 				continue;
@@ -185,8 +180,8 @@ public:
 		{
 			auto effect = explosion_effects.front();
 			explosion_effects.pop();
-			effect.Draw(engine);
-			if (!effect.IsStopped())
+			effect.ApplyEffect(engine);
+			if (!effect.IsCompleted())
 				explosion_effects.push(effect);
 		}
 
@@ -259,7 +254,7 @@ public:
 	{
 		player_projectiles = decltype(player_projectiles){};
 		enemy_projectiles = decltype(enemy_projectiles){};
-		explosion_effects = std::queue<AnimatedSprite>();
+		explosion_effects = decltype(explosion_effects){};
 
 		player_ship.Reset();
 		enemy_ship.Reset();

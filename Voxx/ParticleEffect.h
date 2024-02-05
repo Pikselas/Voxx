@@ -4,7 +4,7 @@
 
 class ParticleEffect
 {
-private:
+protected:
 	AnimatedSprite effect_animation;
 protected:
 	ParticleEffect(CoreEngine& engine, const std::string& fmt_path, unsigned int frame_count, std::chrono::milliseconds duration, std::optional<unsigned int> repeat_count = std::nullopt)
@@ -27,6 +27,10 @@ public:
 	void SetLocation(DirectX::XMVECTOR position)
 	{
 		effect_animation.SetPosition(position);
+	}
+	void Cancel()
+	{
+		effect_animation.SetRepeatCount(0);
 	}
 	bool IsCompleted() const
 	{

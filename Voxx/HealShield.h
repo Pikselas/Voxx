@@ -15,10 +15,14 @@ public:
 	{
 		if (ship.GetSkillPoint() > 1)
 		{
-			ship.AddSkillPoint(-1);
+			//ship.AddSkillPoint(-1);
 			ship.AddHealth(5);
 			skill_effect->SetLocation(ship.GetPosition());
 			skill_effect->ApplyEffect(engine);
+		}
+		else
+		{
+			skill_effect->Cancel();
 		}
 	}
 };
