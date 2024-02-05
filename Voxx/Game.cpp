@@ -57,7 +57,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	{
 		Scene& scene;
 		bool& RemoteReady;
-		ParticleEffect& ShiledEffect;
+		ParticleEffect& ShieldEffect;
 	};
 
 	GameData game_data{ scene , RemoteReady , shield_effect };
@@ -84,7 +84,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				auto skill_data = ((Event<SkillEvent>*)(data))->event_data.type_hash;
 				if (typeid(HealShield).hash_code() == skill_data)
 				{
-					scene.SetEnemySkill<HealShield>(((GameData*)(game_data))->ShiledEffect);
+					scene.SetEnemySkill<HealShield>(((GameData*)(game_data))->ShieldEffect);
 				}
 			}
 			break;
