@@ -36,18 +36,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	scene.SetSky(background);
 	scene.SetLaserBullet(laser_bullet);
 
-	window.keyboard.OnKeyPress = [&](auto ev)
-		{
-			if (ev.KEY_CODE == 'A')
-			{
-				scene.SetSkill<HealShield>(shield_effect);
-			}
-			else if (ev.KEY_CODE == 'D')
-			{
-				scene.RemoveSkill();
-			}
-		};
-
 	auto lib = LoadLibrary("client.dll");
 	if (lib == NULL)
 	{
@@ -69,9 +57,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	{
 		Scene& scene;
 		bool& RemoteReady;
+		ParticleEffect& ShiledEffect;
 	};
 
-	GameData game_data{ scene , RemoteReady };
+	GameData game_data{ scene , RemoteReady , shield_effect };
 	GetEvent([](void* game_data, void* data, int size)
 		{
 			auto* ev = (EventHolder*)data;
@@ -90,8 +79,36 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			case EventHolder::Type::Ready:
 				((GameData*)game_data)->RemoteReady = true;
 				break;
+			case EventHolder::Type::ActivateSkill:
+			{
+				auto skill_data = ((Event<SkillEvent>*)(data))->event_data.type_hash;
+				if (typeid(HealShield).hash_code() == skill_data)
+				{
+					scene.SetEnemySkill<HealShield>(((GameData*)(game_data))->ShiledEffect);
+				}
 			}
+			break;
+			case EventHolder::Type::DisableSkill:
+				scene.RemoveEnemySkill();
+				break;
+		}
 		}, &game_data);
+
+	window.keyboard.OnKeyPress = [&](auto ev)
+		{
+			if (ev.KEY_CODE == 'A')
+			{
+				scene.SetSkill<HealShield>(shield_effect);
+				auto ev = CreateGameEvent(ActivateSkillEvent<HealShield>{});
+				SendEvent(&ev, sizeof(ev));
+			}
+			else if (ev.KEY_CODE == 'D')
+			{
+				auto ev = CreateGameEvent(DisableSkillEvent{});
+				SendEvent(&ev, sizeof(ev));
+				scene.RemoveSkill();
+			}
+		};
 
 	window.mouse.OnMove = [&](auto&)
 		{

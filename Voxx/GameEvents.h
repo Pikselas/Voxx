@@ -10,6 +10,25 @@ struct FireEvent
 struct ReadyEvent
 {};
 
+template<typename T>
+concept SkillType = std::is_base_of_v<class SkillEquipment, T>;
+
+struct SkillEvent
+{
+	size_t type_hash;
+	SkillEvent(size_t type_hash) : type_hash(type_hash){}
+};
+
+template<SkillType Skill>
+struct ActivateSkillEvent : public SkillEvent
+{
+	using Type = Skill;
+	ActivateSkillEvent() : SkillEvent(typeid(Skill).hash_code()) {}
+};
+
+struct DisableSkillEvent
+{};
+
 class EventHolder
 {
 public:
@@ -18,6 +37,8 @@ public:
 		Move, 
 		Fire,
 		Ready,
+		ActivateSkill,
+		DisableSkill
 	};
 	Type type;
 };
@@ -44,6 +65,14 @@ Event<EventType> CreateGameEvent(EventType event_data)
 	else if constexpr (std::is_same_v<EventType, ReadyEvent>)
 	{
 		ev.type = EventHolder::Type::Ready;
+	}
+	else if constexpr (std::is_same_v<EventType, DisableSkillEvent>)
+	{
+		ev.type = EventHolder::Type::DisableSkill;
+	}
+	else if constexpr (std::is_same_v<EventType, ActivateSkillEvent<typename EventType::Type>>)
+	{
+		ev.type = EventHolder::Type::ActivateSkill;
 	}
 	ev.event_data = event_data;
 	return ev;
