@@ -8,7 +8,9 @@
 #include <thread>
 
 #include "GameEvents.h"
-#include "HealCircle.h"
+#include "HealShield.h"
+
+#include "HealShieldEffect.h"
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -23,7 +25,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	auto background = engine.CreateSprite(Image("media/background-1.jpg"));
 	auto laser_bullet = engine.CreateSprite(Image("media/bullet.png"));
 
-	auto heal_skill = HealCircle(engine);
+	auto shield_effect = HealShieldEffect(engine);
+
+	auto heal_skill = HealShield(shield_effect);
 
 	Scene scene(engine);
 

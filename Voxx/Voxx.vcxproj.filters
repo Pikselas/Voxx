@@ -19,6 +19,9 @@
     <Filter Include="Header Files\Skills">
       <UniqueIdentifier>{484a0c24-32c2-4938-babe-2662a381aeee}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Effects">
+      <UniqueIdentifier>{ed91d78b-29c0-419d-b236-66f8aa313682}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\CoreEngine.cpp">
@@ -98,8 +101,14 @@
     <ClInclude Include="SkillEquipment.h">
       <Filter>Header Files\Skills</Filter>
     </ClInclude>
-    <ClInclude Include="HealCircle.h">
+    <ClInclude Include="HealShield.h">
       <Filter>Header Files\Skills</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleEffect.h">
+      <Filter>Header Files\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="HealShieldEffect.h">
+      <Filter>Header Files\Effects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
