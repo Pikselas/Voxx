@@ -8,6 +8,9 @@
 #include "LaserBullet.h"
 #include "TargetedMissile.h"
 
+template<typename T>
+concept SkillEquipmentT = std::is_base_of_v<SkillEquipment,T>;
+
 class Scene
 {
 private:
@@ -231,13 +234,25 @@ public:
 		enemy_ship.RotateTowards(player_ship.GetPosition());
 		player_ship.RotateTowards(enemy_ship.GetPosition());
 	}
-	void SetSkill(SkillEquipment* skill)
+public:
+	template<SkillEquipmentT SkillType , typename... ParamsT>
+	void SetSkill(ParamsT... params)
 	{
-		player_ship.Skill = skill;
+		player_ship.Skill = std::make_unique<SkillType>(params...);
 	}
-	void SetEnemySkill(SkillEquipment* skill)
+	template<SkillEquipmentT SkillType, typename... ParamsT>
+	void SetEnemySkill(ParamsT... params)
 	{
-		enemy_ship.Skill = skill;
+		enemy_ship.Skill = std::make_unique<SkillType>(params...);
+	}
+public:
+	void RemoveSkill()
+	{
+		player_ship.Skill = nullptr;
+	}
+	void RemoveEnemySkill()
+	{
+		enemy_ship.Skill = nullptr;
 	}
 public:
 	void Reset()

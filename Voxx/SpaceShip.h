@@ -18,7 +18,7 @@ public:
 private:
 	Type type;
 public:
-	SkillEquipment* Skill;
+	std::unique_ptr<SkillEquipment> Skill;
 public:
 	SpaceShip(CoreEngine& engine, Type type)
 		:

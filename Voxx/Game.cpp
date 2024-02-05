@@ -27,8 +27,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	auto shield_effect = HealShieldEffect(engine);
 
-	auto heal_skill = HealShield(shield_effect);
-
 	Scene scene(engine);
 
 	scene.SetPath(path);
@@ -39,11 +37,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		{
 			if (ev.KEY_CODE == 'A')
 			{
-				scene.SetSkill(&heal_skill);
+				scene.SetSkill<HealShield>(shield_effect);
 			}
 			else if (ev.KEY_CODE == 'D')
 			{
-				scene.SetSkill(nullptr);
+				scene.RemoveSkill();
 			}
 		};
 
