@@ -7,7 +7,6 @@
 #include <random>
 #include <thread>
 
-#include "GameEvents.h"
 #include "HealShield.h"
 
 #include "ExplosionEffect.h"

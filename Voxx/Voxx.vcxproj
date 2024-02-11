@@ -155,12 +155,12 @@
     <ClInclude Include="HealShield.h" />
     <ClInclude Include="HealShieldEffect.h" />
     <ClInclude Include="ParticleEffect.h" />
+    <ClInclude Include="SkillEquipment.h" />
     <ClInclude Include="StatusBar.h" />
     <ClInclude Include="LaserBullet.h" />
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="SkillEquipment.h" />
     <ClInclude Include="SpaceShip.h" />
     <ClInclude Include="TargetedMissile.h" />
   </ItemGroup>

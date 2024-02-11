@@ -98,9 +98,6 @@
     <ClInclude Include="TargetedMissile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SkillEquipment.h">
-      <Filter>Header Files\Skills</Filter>
-    </ClInclude>
     <ClInclude Include="HealShield.h">
       <Filter>Header Files\Skills</Filter>
     </ClInclude>
@@ -115,6 +112,9 @@
     </ClInclude>
     <ClInclude Include="ExplosionEffect.h">
       <Filter>Header Files\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="SkillEquipment.h">
+      <Filter>Header Files\Skills</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

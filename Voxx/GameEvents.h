@@ -1,4 +1,8 @@
 #pragma once
+#include <map>
+#include <queue>
+#include <functional>
+
 struct MoveEvent
 {
 	unsigned int x;
@@ -10,8 +14,13 @@ struct FireEvent
 struct ReadyEvent
 {};
 
+struct CollisionEvent
+{
+	unsigned int x, y;
+};
+
 template<typename T>
-concept SkillType = std::is_base_of_v<class SkillEquipment, T>;
+concept SkillType = true; //std::is_base_of_v<class SkillEquipment, T>;
 
 struct SkillEvent
 {
@@ -29,24 +38,33 @@ struct ActivateSkillEvent : public SkillEvent
 struct DisableSkillEvent
 {};
 
-class EventHolder
+struct EventHolder
 {
-public:
 	enum class Type
 	{
 		Move, 
 		Fire,
 		Ready,
 		ActivateSkill,
-		DisableSkill
+		DisableSkill,
+		ProjectileCollision
 	};
 	Type type;
+
+	EventHolder() = default;
+	EventHolder(Type type) : type(type) {}
+
+};
+
+enum class DefaultEventAction
+{
+	Enable,
+	Disable
 };
 
 template<typename EventType>
-class Event : public EventHolder
+struct Event : public EventHolder
 {
-public:
 	EventType event_data;
 };
 
@@ -70,10 +88,25 @@ Event<EventType> CreateGameEvent(EventType event_data)
 	{
 		ev.type = EventHolder::Type::DisableSkill;
 	}
+	else if constexpr (std::is_same_v<EventType, CollisionEvent>)
+	{
+		ev.type = EventHolder::Type::ProjectileCollision;
+	}
 	else if constexpr (std::is_same_v<EventType, ActivateSkillEvent<typename EventType::Type>>)
 	{
 		ev.type = EventHolder::Type::ActivateSkill;
 	}
 	ev.event_data = event_data;
 	return ev;
+}
+
+EventHolder::Type GetEventType(const EventHolder* const event_data)
+{
+	return reinterpret_cast<const EventHolder*>(event_data)->type;
+}
+
+template<typename EventType>
+EventType GetEventData(const EventHolder* const event_data)
+{
+	return reinterpret_cast<const Event<EventType>*>(event_data)->event_data;
 }

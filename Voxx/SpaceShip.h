@@ -91,10 +91,5 @@ public:
 		sprite.Draw(engine);
 		health_bar.Draw();
 		skillpoint_bar.Draw();
-		
-		if (Skill != nullptr)
-		{
-			Skill->ApplySkill(*this , engine);
-		}
 	}
 };

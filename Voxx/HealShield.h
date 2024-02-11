@@ -1,28 +1,38 @@
 #pragma once
-#include "SpaceShip.h"
+#include "Scene.h"
 #include "SkillEquipment.h"
 #include "ParticleEffect.h"
 
 class HealShield : public SkillEquipment
 {
 private:
-	std::unique_ptr<ParticleEffect> skill_effect;
+	std::shared_ptr<ParticleEffect> skill_effect;
 public:
-	HealShield(const ParticleEffect& effect) : skill_effect(std::make_unique<ParticleEffect>(effect))
+	HealShield(const ParticleEffect& effect) : skill_effect(std::make_shared<ParticleEffect>(effect))
 	{}
 public:
-	void ApplySkill(SpaceShip& ship , RenderCommandEngine& engine) override
+	DefaultEventAction ApplySkill(Scene& scene , SpaceShip& ship, const EventHolder* const event_data) override
 	{
-		if (ship.GetSkillPoint() > 1)
+		auto default_event_action = DefaultEventAction::Enable;
+		switch (GetEventType(event_data))
 		{
-			//ship.AddSkillPoint(-1);
-			ship.AddHealth(5);
-			skill_effect->SetLocation(ship.GetPosition());
-			skill_effect->ApplyEffect(engine);
+			case EventHolder::Type::ActivateSkill:
+			{
+				skill_effect->SetLocation(ship.GetPosition());
+				scene.AddEffect(skill_effect);
+			}
+			break;
+			case EventHolder::Type::Move:
+			{
+				skill_effect->SetLocation(ship.GetPosition());
+			}
+			break;
+			case EventHolder::Type::DisableSkill:
+			{
+				skill_effect->Cancel();
+			}
+			break;
 		}
-		else
-		{
-			skill_effect->Cancel();
-		}
+		return default_event_action;
 	}
 };

@@ -5,6 +5,7 @@
 #include "Engine/CoreEngine.h"
 
 #include "SpaceShip.h"
+#include "GameEvents.h"
 #include "LaserBullet.h"
 #include "TargetedMissile.h"
 #include "ExplosionEffect.h"
@@ -31,24 +32,29 @@ private:
 	SpaceShip player_ship;
 	SpaceShip enemy_ship;
 private:
-	ExplosionEffect explosion_effect;
+	ExplosionEffect default_explosion_effect;
 private:
 	std::deque<path_component> path_components;
 private:
 	std::queue<std::unique_ptr<Projectile>> player_projectiles;
 	std::queue<std::unique_ptr<Projectile>> enemy_projectiles;
 private:
-	std::queue<ExplosionEffect> explosion_effects;
+	std::queue<std::unique_ptr<EventHolder>> internal_events;
+private:
+	std::queue<std::shared_ptr<ParticleEffect>> particle_effects;
+public:
+	constexpr static unsigned int ENEMY_Y = 250;
+	constexpr static unsigned int PLAYER_Y = 580;
 public:
 	Scene(CoreEngine& engine) 
 		: 
 	engine(engine), 
 	player_ship(engine, SpaceShip::Type::Ally),
 	enemy_ship(engine, SpaceShip::Type::Enemy),
-	explosion_effect(engine)
+	default_explosion_effect(engine)
 	{
-		player_ship.MoveTo(509, 580);
-		enemy_ship.MoveTo(509, 250);
+		player_ship.MoveTo(509, PLAYER_Y);
+		enemy_ship.MoveTo(509, ENEMY_Y);
 	}
 private:
 	bool IsColliding(DirectX::XMVECTOR pos1 , unsigned int half_w1 , unsigned int half_h1, DirectX::XMVECTOR pos2 , unsigned int half_w2 , unsigned int half_h2)
@@ -121,10 +127,9 @@ public:
 			
 			if (Colliding)
 			{
-				auto effect = explosion_effect;
-				effect.SetLocation(pos);
-				explosion_effects.push(effect);
 				enemy_ship.AddHealth(-5);
+				auto pos = projectile->GetPosition();
+				internal_events.emplace(std::make_unique<Event<CollisionEvent>>(CreateGameEvent(CollisionEvent{ (unsigned int) DirectX::XMVectorGetX(pos) ,(unsigned int) DirectX::XMVectorGetY(pos)})));
 				continue;
 			}
 
@@ -134,6 +139,7 @@ public:
 			}
 
 			player_projectiles.emplace(std::move(projectile));
+
 		}
 
 		//for collsion in enemy ship
@@ -157,9 +163,7 @@ public:
 
 			if (Colliding)
 			{
-				auto effect = explosion_effect;
-				effect.SetLocation(pos);
-				explosion_effects.push(effect);
+				
 				player_ship.AddHealth(-5);
 				continue;
 			}
@@ -172,17 +176,42 @@ public:
 			enemy_projectiles.emplace(std::move(projectile));
 		}
 
+		while (!internal_events.empty())
+		{
+			auto event_data = internal_events.front().get();
+			auto deafult_action = player_ship.Skill != nullptr ? player_ship.Skill->ApplySkill(*this, player_ship, event_data) : DefaultEventAction::Enable;
+
+			if (deafult_action == DefaultEventAction::Enable)
+			{
+				switch (event_data->type)
+				{
+					case EventHolder::Type::DisableSkill:
+						player_ship.Skill = nullptr;
+					break;
+					case EventHolder::Type::ProjectileCollision:
+					{
+						auto pos = GetEventData<CollisionEvent>(event_data);
+						default_explosion_effect.SetLocation(DirectX::XMVectorSet(pos.x, pos.y, 0, 1));
+						particle_effects.emplace(std::make_shared<ExplosionEffect>(default_explosion_effect));
+					}
+					break;
+				}
+			}
+
+			internal_events.pop();
+		}
+
 		enemy_ship.Draw(engine);
 		player_ship.Draw(engine);
 
-		size_ = explosion_effects.size();
-		while (size_-- != 0)
+		auto _size = particle_effects.size();
+		while (_size--)
 		{
-			auto effect = explosion_effects.front();
-			explosion_effects.pop();
-			effect.ApplyEffect(engine);
-			if (!effect.IsCompleted())
-				explosion_effects.push(effect);
+			auto effect = std::move(particle_effects.front());
+			particle_effects.pop();
+			effect->ApplyEffect(engine);
+			if (!effect->IsCompleted())
+				particle_effects.emplace(std::move(effect));
 		}
 
 		if(enemy_ship.Died())
@@ -233,7 +262,11 @@ public:
 	template<SkillEquipmentT SkillType , typename... ParamsT>
 	void SetSkill(ParamsT... params)
 	{
-		player_ship.Skill = std::make_unique<SkillType>(params...);
+		if (player_ship.Skill == nullptr)
+		{
+			player_ship.Skill = std::make_unique<SkillType>(params...);
+			internal_events.emplace(std::make_unique<EventHolder>(EventHolder::Type::ActivateSkill));
+		}
 	}
 	template<SkillEquipmentT SkillType, typename... ParamsT>
 	void SetEnemySkill(ParamsT... params)
@@ -241,9 +274,14 @@ public:
 		enemy_ship.Skill = std::make_unique<SkillType>(params...);
 	}
 public:
+	void AddEffect(std::shared_ptr<ParticleEffect> effect)
+	{
+		particle_effects.push(effect);
+	}
+public:
 	void RemoveSkill()
 	{
-		player_ship.Skill = nullptr;
+		internal_events.emplace(std::make_unique<EventHolder>(EventHolder::Type::DisableSkill));
 	}
 	void RemoveEnemySkill()
 	{
@@ -254,7 +292,8 @@ public:
 	{
 		player_projectiles = decltype(player_projectiles){};
 		enemy_projectiles = decltype(enemy_projectiles){};
-		explosion_effects = decltype(explosion_effects){};
+		particle_effects = decltype(particle_effects){};
+		internal_events = decltype(internal_events){};
 
 		player_ship.Reset();
 		enemy_ship.Reset();
@@ -262,26 +301,13 @@ public:
 public:
 	void SpaceShipController(CustomWindow& window)
 	{
-		player_ship.MoveTo(window.mouse.GetX(), 580);
+		player_ship.MoveTo(window.mouse.GetX(), PLAYER_Y);
 		player_ship.RotateTowards(enemy_ship.GetPosition());
 		enemy_ship.RotateTowards(player_ship.GetPosition());
+		internal_events.emplace(std::make_unique<Event<MoveEvent>>(CreateGameEvent(MoveEvent{ (unsigned int) window.mouse.GetX()})));
 	}
 	void FireBullet()
 	{
-		/*auto bullet1 = bullet;
-		auto bullet2 = bullet;
-
-		bullet1.SetPosition(DirectX::XMVectorSet(DirectX::XMVectorGetX(player_ship.GetPosition()) - 30, 550, 0, 0));
-		bullet2.SetPosition(DirectX::XMVectorSet(DirectX::XMVectorGetX(player_ship.GetPosition()) + 30, 550, 0, 0));
-
-		bullet1.SetTransformation(DirectX::XMMatrixRotationZ(player_ship.GetRotation()));
-		bullet2.SetTransformation(DirectX::XMMatrixRotationZ(player_ship.GetRotation()));
-
-		auto velocity = DirectX::XMVectorScale(player_ship.GetDirection(), 5.0f);
-
-		bullets.push({ velocity, bullet1 });
-		bullets.push({ velocity, bullet2 });*/
-
 		player_projectiles.emplace
 		( 
 			std::make_unique<LaserBullet>
