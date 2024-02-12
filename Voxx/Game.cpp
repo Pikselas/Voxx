@@ -26,9 +26,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	auto background = engine.CreateSprite(Image("media/background-1.jpg"));
 	auto laser_bullet = engine.CreateSprite(Image("media/bullet.png"));
 
-	auto shield_effect = HealShieldEffect(engine);
-	//auto explosion_effect = ExplosionEffect(engine);
-
 	Scene scene(engine);
 
 	scene.SetPath(path);
@@ -56,10 +53,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	{
 		Scene& scene;
 		bool& RemoteReady;
-		ParticleEffect& ShieldEffect;
+		CoreEngine& engine;
 	};
 
-	GameData game_data{ scene , RemoteReady , shield_effect };
+	GameData game_data{ scene , RemoteReady , engine };
 	GetEvent([](void* game_data, void* data, int size)
 		{
 			auto* ev = (EventHolder*)data;
@@ -83,7 +80,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 				auto skill_data = ((Event<SkillEvent>*)(data))->event_data.type_hash;
 				if (typeid(HealShield).hash_code() == skill_data)
 				{
-					scene.SetEnemySkill<HealShield>(((GameData*)(game_data))->ShieldEffect);
+					scene.SetEnemySkill<HealShield>(((GameData*)(game_data))->engine);
 				}
 			}
 			break;
@@ -97,7 +94,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		{
 			if (ev.KEY_CODE == 'A')
 			{
-				scene.SetSkill<HealShield>(shield_effect);
+				scene.SetSkill<HealShield>(engine);
 				auto ev = CreateGameEvent(ActivateSkillEvent<HealShield>{});
 				SendEvent(&ev, sizeof(ev));
 			}

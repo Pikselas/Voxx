@@ -186,7 +186,7 @@ public:
 				switch (event_data->type)
 				{
 					case EventHolder::Type::DisableSkill:
-						player_ship.Skill = nullptr;
+						player_ship.Skill.reset();
 					break;
 					case EventHolder::Type::ProjectileCollision:
 					{

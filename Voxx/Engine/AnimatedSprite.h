@@ -34,7 +34,7 @@ public:
 	}
 	bool IsStopped() const
 	{
-		return repeat_count ? (*repeat_count != 0 ? false : true) : false;
+		return repeat_count ? ((*repeat_count) != 0 ? false : true) : false;
 	}
 private:
 	unsigned int GetFrameIndex() const

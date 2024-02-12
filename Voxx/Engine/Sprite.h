@@ -7,6 +7,8 @@ private:
 	DirectX::XMVECTOR position = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f , 1.0f);
 	DirectX::XMMATRIX transformation = DirectX::XMMatrixIdentity();
 public:
+	virtual ~Sprite() = default;
+public:
 	virtual void Draw(RenderCommandEngine& engine) const = 0;
 protected:
 	virtual void DrawNonTransformed(RenderCommandEngine& engine) const = 0;

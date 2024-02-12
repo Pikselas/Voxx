@@ -147,11 +147,14 @@
     <ClInclude Include="Engine\GDIPlusManager.h" />
     <ClInclude Include="Engine\Image.h" />
     <ClInclude Include="Engine\ImageSprite.h" />
+    <ClInclude Include="Engine\RenderCommandEngine.h" />
+    <ClInclude Include="Engine\RenderDevice.h" />
     <ClInclude Include="Engine\Sprite.h" />
     <ClInclude Include="Engine\StandardWindow.h" />
     <ClInclude Include="Engine\Window.h" />
     <ClInclude Include="ExplosionEffect.h" />
     <ClInclude Include="GameEvents.h" />
+    <ClInclude Include="HealExplosionEffect.h" />
     <ClInclude Include="HealShield.h" />
     <ClInclude Include="HealShieldEffect.h" />
     <ClInclude Include="ParticleEffect.h" />

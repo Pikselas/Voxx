@@ -116,6 +116,15 @@
     <ClInclude Include="SkillEquipment.h">
       <Filter>Header Files\Skills</Filter>
     </ClInclude>
+    <ClInclude Include="HealExplosionEffect.h">
+      <Filter>Header Files\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\RenderCommandEngine.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\RenderDevice.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Engine\VertexShader.hlsl">

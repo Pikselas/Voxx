@@ -36,4 +36,5 @@ public:
 	{
 		return effect_animation.IsStopped();
 	}
+	virtual ~ParticleEffect() = default;
 };

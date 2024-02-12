@@ -15,6 +15,8 @@ protected:
 		projectile.SetPosition(position);
 	}
 public:
+	virtual ~Projectile() = default;
+public:
 	void Draw(RenderCommandEngine& engine)
 	{
 		projectile.Draw(engine);

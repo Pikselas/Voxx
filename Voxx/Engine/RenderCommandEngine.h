@@ -50,4 +50,6 @@ public:
 		auto render_target_view = render_device.GetTarget();
 		device_context->OMSetRenderTargets(1u, &render_target_view, nullptr);
 	}
+public:
+	virtual ~RenderCommandEngine() = default;
 };

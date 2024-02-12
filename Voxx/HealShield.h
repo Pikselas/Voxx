@@ -1,14 +1,19 @@
 #pragma once
 #include "Scene.h"
 #include "SkillEquipment.h"
-#include "ParticleEffect.h"
+#include "HealShieldEffect.h"
+#include "HealExplosionEffect.h"
 
 class HealShield : public SkillEquipment
 {
 private:
 	std::shared_ptr<ParticleEffect> skill_effect;
+	//std::shared_ptr<ParticleEffect> collison_effect;
 public:
-	HealShield(const ParticleEffect& effect) : skill_effect(std::make_shared<ParticleEffect>(effect))
+	HealShield(CoreEngine& engine) 
+		: 
+	skill_effect(std::make_shared<HealShieldEffect>(engine))
+	//collison_effect(std::make_shared<HealExplosionEffect>(engine))
 	{}
 public:
 	DefaultEventAction ApplySkill(Scene& scene , SpaceShip& ship, const EventHolder* const event_data) override
