@@ -106,7 +106,7 @@ public:
 			new_path_components.pop();
 		}
 
-		// for collision in player's ship from enemy projectiles
+		// projectiles thrown by player
 		size_ = player_projectiles.size();
 		while (size_-- != 0)
 		{
@@ -127,9 +127,8 @@ public:
 			
 			if (Colliding)
 			{
-				enemy_ship.AddHealth(-5);
-				auto pos = projectile->GetPosition();
-				internal_events.emplace(std::make_unique<Event<CollisionEvent>>(CreateGameEvent(CollisionEvent{ (unsigned int) DirectX::XMVectorGetX(pos) ,(unsigned int) DirectX::XMVectorGetY(pos)})));
+				default_explosion_effect.SetLocation(projectile->GetPosition());
+				AddEffect(std::make_shared<ExplosionEffect>(default_explosion_effect));
 				continue;
 			}
 
@@ -142,7 +141,7 @@ public:
 
 		}
 
-		//for collsion in enemy ship
+		//projectiles thrown by enemy
 		size_ = enemy_projectiles.size();
 		while (size_-- != 0)
 		{
@@ -163,8 +162,8 @@ public:
 
 			if (Colliding)
 			{
-				
-				player_ship.AddHealth(-5);
+				auto pos = projectile->GetPosition();
+				internal_events.emplace(std::make_unique<Event<CollisionEvent>>(CreateGameEvent(CollisionEvent{ (unsigned int)DirectX::XMVectorGetX(pos) ,(unsigned int)DirectX::XMVectorGetY(pos) })));
 				continue;
 			}
 
@@ -191,6 +190,7 @@ public:
 					case EventHolder::Type::ProjectileCollision:
 					{
 						auto pos = GetEventData<CollisionEvent>(event_data);
+						player_ship.AddHealth(-5);
 						default_explosion_effect.SetLocation(DirectX::XMVectorSet(pos.x, pos.y, 0, 1));
 						particle_effects.emplace(std::make_shared<ExplosionEffect>(default_explosion_effect));
 					}

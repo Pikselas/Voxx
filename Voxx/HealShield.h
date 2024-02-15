@@ -7,13 +7,13 @@
 class HealShield : public SkillEquipment
 {
 private:
+	HealExplosionEffect collision_effect;
 	std::shared_ptr<ParticleEffect> skill_effect;
-	//std::shared_ptr<ParticleEffect> collison_effect;
 public:
 	HealShield(CoreEngine& engine) 
 		: 
+	collision_effect(engine),
 	skill_effect(std::make_shared<HealShieldEffect>(engine))
-	//collison_effect(std::make_shared<HealExplosionEffect>(engine))
 	{}
 public:
 	DefaultEventAction ApplySkill(Scene& scene , SpaceShip& ship, const EventHolder* const event_data) override
@@ -30,6 +30,14 @@ public:
 			case EventHolder::Type::Move:
 			{
 				skill_effect->SetLocation(ship.GetPosition());
+			}
+			break;
+			case EventHolder::Type::ProjectileCollision:
+			{
+				auto data = GetEventData<CollisionEvent>(event_data);
+				collision_effect.SetLocation(DirectX::XMVectorSet(data.x, data.y, 0, 1));
+				scene.AddEffect(std::make_shared<HealExplosionEffect>(collision_effect));
+				default_event_action = DefaultEventAction::Disable;
 			}
 			break;
 			case EventHolder::Type::DisableSkill:

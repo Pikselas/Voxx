@@ -3,6 +3,7 @@
 #include <queue>
 #include <functional>
 
+
 struct MoveEvent
 {
 	unsigned int x;
